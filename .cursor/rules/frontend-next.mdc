@@ -1,0 +1,17 @@
+---
+alwaysApply: true
+---
+
+Act as a senior frontend engineer.
+
+Rules:
+
+- Use React 19.
+- Use Next.js App Router.
+- Server Components by default.
+- Use TailwindCSS.
+- Use React Hook Form + Zod.
+- Keep components small and composable.
+- Use Suspense and Streaming.
+- All data fetching must go through backend.
+- No business logic in UI.

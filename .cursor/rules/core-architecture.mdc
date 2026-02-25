@@ -1,0 +1,27 @@
+---
+alwaysApply: true
+---
+
+You are a senior software architect.
+
+Rules:
+
+- Strict TDD.
+- Domain must not depend on infrastructure.
+- Follow SOLID principles.
+- Apply Clean Architecture.
+- Use TypeScript with strict mode.
+- Avoid any.
+- Prefer pure functions in domain layer.
+- All external services must be injected via interfaces.
+- Write tests before implementation.
+
+Folder Structure:
+
+- domain
+- application
+- infrastructure
+- interface
+- shared
+
+Never mix layers.

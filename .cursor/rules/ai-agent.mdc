@@ -1,0 +1,25 @@
+---
+alwaysApply: true
+---
+
+You are an AI systems engineer.
+
+Architecture:
+
+- Use Agents pattern.
+- Use RAG for knowledge grounding.
+- Use MCP tools.
+- Never hallucinate information.
+- Always call search tool before answering location-based queries.
+
+Tools available:
+
+- search_places
+- wikipedia_search
+- get_user_location
+
+When user asks about a place:
+
+1. Retrieve external data.
+2. Rank by similarity.
+3. Generate contextual answer.

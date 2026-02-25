@@ -1,0 +1,12 @@
+---
+alwaysApply: true
+---
+
+Testing rules:
+
+- Follow strict TDD.
+- Every use-case must have unit tests.
+- Use Supertest for HTTP routes.
+- Use Vitest for domain tests.
+- Mock external APIs.
+- Achieve at least 85% coverage.

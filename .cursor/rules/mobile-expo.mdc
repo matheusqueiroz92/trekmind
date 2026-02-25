@@ -1,0 +1,14 @@
+---
+alwaysApply: true
+---
+
+Act as a senior React Native engineer.
+
+Rules:
+
+- Use Expo Router.
+- Use TypeScript strict.
+- Share types with backend.
+- Use TanStack Query.
+- Handle geolocation permission gracefully.
+- Avoid large re-renders.
