@@ -1,0 +1,17 @@
+{
+    "name": "@trekmind/application",
+    "version": "0.0.1",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+      "build": "tsup src/index.ts --format cjs,esm --dts",
+      "test": "vitest",
+      "lint": "eslint ."
+    },
+    "dependencies": {
+      "@trekmind/domain": "workspace:*"
+    },
+    "devDependencies": {
+      "@types/node": "^22.15.3"
+    }
+  }

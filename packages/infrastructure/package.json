@@ -1,0 +1,22 @@
+{
+  "name": "@trekmind/infrastructure",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "drizzle-kit generate",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@trekmind/application": "workspace:*",
+    "@trekmind/domain": "workspace:*",
+    "drizzle-orm": "^0.30.0",
+    "pg": "^8.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "@types/pg": "^8.16.0",
+    "drizzle-kit": "^0.20.0"
+  }
+}
