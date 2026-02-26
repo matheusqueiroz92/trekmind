@@ -1,0 +1,20 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1772053949624,
+      "tag": "0000_rapid_jack_power",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1772082674314,
+      "tag": "0001_superb_gabe_jones",
+      "breakpoints": true
+    }
+  ]
+}

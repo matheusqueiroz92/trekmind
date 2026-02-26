@@ -1,0 +1,124 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { authClient } from "@/lib/auth-client";
+import { API_ERROR_MESSAGES } from "@/lib/api-errors";
+
+export default function RegisterPage() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const { data, error: err } = await authClient.signUp.email({
+        name,
+        email,
+        password: password || undefined,
+        callbackURL: "/",
+      });
+      if (err) {
+        setError(err.message ?? API_ERROR_MESSAGES.AUTH_REGISTER_FAILED);
+        return;
+      }
+      if (data) {
+        router.push("/");
+        router.refresh();
+      }
+    } catch {
+      setError(API_ERROR_MESSAGES.NETWORK_ERROR);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleSocialSignUp(provider: "google" | "github") {
+    setError("");
+    await authClient.signIn.social({
+      provider,
+      callbackURL: "/",
+    });
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
+      <div className="w-full max-w-md">
+        <h1 className="text-2xl font-bold text-slate-800 mb-6">Cadastrar</h1>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Nome"
+            required
+            minLength={2}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+          />
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="E-mail"
+            required
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Senha (mín. 8 caracteres)"
+            minLength={8}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+          />
+          {error && <p className="text-red-600 text-sm">{error}</p>}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full px-4 py-3 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 disabled:opacity-50"
+          >
+            {loading ? "Cadastrando..." : "Cadastrar"}
+          </button>
+        </form>
+        <div className="mt-4 space-y-2">
+          <p className="text-center text-slate-500 text-sm">ou cadastre-se com</p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => handleSocialSignUp("google")}
+              className="flex-1 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50"
+            >
+              Google
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSocialSignUp("github")}
+              className="flex-1 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50"
+            >
+              GitHub
+            </button>
+          </div>
+        </div>
+        <p className="mt-4 text-slate-600 text-sm">
+          Já tem conta?{" "}
+          <Link href="/login" className="text-emerald-600 hover:underline">
+            Entrar
+          </Link>
+        </p>
+        <Link
+          href="/"
+          className="block mt-4 text-slate-500 hover:underline text-sm"
+        >
+          Voltar ao início
+        </Link>
+      </div>
+    </div>
+  );
+}

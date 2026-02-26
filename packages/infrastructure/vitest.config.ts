@@ -1,0 +1,20 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { defineConfig } from "vitest/config";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export default defineConfig({
+  resolve: {
+    alias: {
+      "@trekmind/domain": path.resolve(__dirname, "../domain/src/index.ts"),
+      "@trekmind/application": path.resolve(__dirname, "../application/src/index.ts"),
+    },
+  },
+  test: {
+    include: ["src/**/*.spec.ts"],
+    exclude: ["dist", "node_modules"],
+    environment: "node",
+    passWithNoTests: true,
+  },
+});

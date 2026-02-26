@@ -20,12 +20,21 @@ export class DrizzleUserRepository implements UserRepository {
     });
   }
 
-  async save(user: User): Promise<void> {
+  async save(user: User, options?: { passwordHash: string }): Promise<void> {
     await db.insert(users).values({
       id: user.id,
       name: user.name,
       email: user.email,
+      passwordHash: options?.passwordHash ?? null,
       createdAt: user.createdAt,
     });
+  }
+
+  async getPasswordHash(email: string): Promise<string | null> {
+    const result = await db
+      .select({ passwordHash: users.passwordHash })
+      .from(users)
+      .where(eq(users.email, email));
+    return result[0]?.passwordHash ?? null;
   }
 }
