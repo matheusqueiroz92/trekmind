@@ -2,6 +2,7 @@ import { useState } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet, Alert } from "react-native";
 import { Link, useRouter } from "expo-router";
 import * as Location from "expo-location";
+import { authHeaders } from "../lib/auth-token";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000";
 
@@ -14,12 +15,13 @@ export default function Search() {
     if (!query.trim()) return;
     setLoading(true);
     try {
+      const headers = await authHeaders();
       const res = await fetch(
-        `${API_URL}/api/places/search?q=${encodeURIComponent(query.trim())}`
+        `${API_URL}/api/places/search?q=${encodeURIComponent(query.trim())}&lang=pt`,
+        { headers }
       );
       if (!res.ok) throw new Error("Busca falhou");
-      const data = await res.json();
-      router.push({ pathname: "/places", params: { data: JSON.stringify(data) } });
+      router.push({ pathname: "/places", params: { q: query.trim() } });
     } catch {
       Alert.alert("Erro", "Não foi possível buscar. Tente novamente.");
     } finally {
@@ -38,14 +40,15 @@ export default function Search() {
       }
       const pos = await Location.getCurrentPositionAsync({});
       const { latitude, longitude } = pos.coords;
+      const headers = await authHeaders();
       const res = await fetch(
-        `${API_URL}/api/places/nearby?lat=${latitude}&lng=${longitude}&radius=15`
+        `${API_URL}/api/places/nearby?lat=${latitude}&lng=${longitude}&radius=15`,
+        { headers }
       );
       if (!res.ok) throw new Error("Falha ao buscar");
-      const data = await res.json();
       router.push({
         pathname: "/places",
-        params: { data: JSON.stringify(data) },
+        params: { lat: String(latitude), lng: String(longitude) },
       });
     } catch {
       Alert.alert("Erro", "Não foi possível obter localização ou buscar.");

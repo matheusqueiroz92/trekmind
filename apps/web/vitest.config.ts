@@ -11,5 +11,11 @@ export default defineConfig({
     environment: "node",
     include: ["**/*.spec.ts", "**/*.spec.tsx"],
     exclude: ["node_modules", ".next"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "lcov"],
+      include: ["app/**/*.ts", "lib/**/*.ts", "proxy.ts"],
+      exclude: ["**/*.spec.ts", "**/*.d.ts", ".next/**"],
+    },
   },
 });

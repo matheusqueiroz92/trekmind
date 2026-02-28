@@ -9,6 +9,7 @@ export {
 export { DrizzleUserRepository } from "./repositories/drizzle-user-repository";
 export { ExternalPlaceRepository } from "./repositories/external-place-repository";
 export { WikipediaGateway } from "./gateways/wikipedia-gateway";
+export { GooglePlacesGateway } from "./gateways/google-places-gateway";
 export { GeocodingServiceImpl } from "./gateways/geocoding-service";
 export { OpenAILLMClient } from "./gateways/openai-llm-client";
 export { JwtTokenService, type JwtPayload } from "./gateways/auth-service";

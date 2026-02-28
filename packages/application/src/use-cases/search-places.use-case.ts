@@ -10,6 +10,7 @@ export interface SearchPlacesRequest {
   address?: string;
   city?: string;
   country?: string;
+  lang?: string;
 }
 
 export class SearchPlacesUseCase {
@@ -42,7 +43,8 @@ export class SearchPlacesUseCase {
 
     const places = await this.placeRepository.searchByQuery(
       request.query,
-      location
+      location,
+      request.lang
     );
     return places.map(toPlaceDTO);
   }
@@ -56,6 +58,9 @@ function toPlaceDTO(place: {
   coordinates: { latitude: number; longitude: number };
   address?: { getValue(): string };
   source?: string;
+  url?: string;
+  imageUrl?: string;
+  wikipediaTitle?: string;
   createdAt: Date;
 }): PlaceDTO {
   return {
@@ -67,6 +72,9 @@ function toPlaceDTO(place: {
     longitude: place.coordinates.longitude,
     address: place.address?.getValue(),
     source: place.source,
+    url: place.url,
+    imageUrl: place.imageUrl,
+    wikipediaTitle: place.wikipediaTitle,
     createdAt: place.createdAt,
   };
 }

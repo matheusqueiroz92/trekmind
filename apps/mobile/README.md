@@ -11,8 +11,8 @@ Funcionalidades:
 - **Home** com acesso a busca, login, cadastro e chat.
 - **Busca** por texto ou “Usar minha localização” (Expo Location).
 - **Lista de lugares** exibindo resultados da busca ou da busca por proximidade.
-- **Login e cadastro** (POST para `/api/auth/login` e `/api/auth/register`).
-- **Chat** com o assistente de viagens (POST `/api/chat`), com opção de enviar coordenadas.
+- **Login e cadastro** via rotas de compatibilidade `POST /api/auth/login` e `POST /api/auth/register`, que devolvem um **JWT**. O token é armazenado com **expo-secure-store** e enviado em `Authorization: Bearer` nas requisições a `/api/chat` e `/api/places/*`. A API usa Better Auth no backend; essas rotas existem para o mobile.
+- **Chat** com o assistente de viagens (POST `/api/chat`), com opção de enviar coordenadas. Requer autenticação (token no header).
 
 ## Estrutura do app (Expo Router)
 

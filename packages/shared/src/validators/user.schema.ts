@@ -1,16 +1,20 @@
 import { z } from "zod";
 
-const emailSchema = z.string().email("Invalid email address");
+const emailSchema = z.string().email("Informe um e-mail válido.");
 
 export const userRegisterSchema = z.object({
-  name: z.string().min(2, "Name must have at least 2 characters"),
+  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres."),
   email: emailSchema,
-  password: z.string().min(8, "Password must have at least 8 characters").optional(),
+  password: z.string().min(8, "Senha deve ter pelo menos 8 caracteres.").optional(),
 });
 
 export const userLoginSchema = z.object({
   email: emailSchema,
-  password: z.string().min(1, "Password is required"),
+  password: z.string().min(1, "Informe a senha."),
+});
+
+export const magicLinkEmailSchema = z.object({
+  email: z.string().email("Informe um e-mail válido."),
 });
 
 export const userResponseSchema = z.object({
@@ -22,4 +26,5 @@ export const userResponseSchema = z.object({
 
 export type UserRegisterSchema = z.infer<typeof userRegisterSchema>;
 export type UserLoginSchema = z.infer<typeof userLoginSchema>;
+export type MagicLinkEmailSchema = z.infer<typeof magicLinkEmailSchema>;
 export type UserResponseSchema = z.infer<typeof userResponseSchema>;

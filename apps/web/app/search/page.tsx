@@ -19,17 +19,27 @@ export default function SearchPage() {
     if (!query.trim()) return;
     setLoading(true);
     setError("");
+    const term = query.trim();
     try {
-      const res = await fetch(
-        `/api/places/search?q=${encodeURIComponent(query.trim())}`
+      const resolveRes = await fetch(
+        `/api/places/resolve?q=${encodeURIComponent(term)}`
       );
-      if (!res.ok) {
-        const parsed = await parseApiErrorFromResponse(res);
+      if (resolveRes.ok) {
+        const resolved = await resolveRes.json() as { name: string; latitude: number; longitude: number };
+        router.push(
+          `/places?lat=${resolved.latitude}&lng=${resolved.longitude}&q=${encodeURIComponent(term)}&name=${encodeURIComponent(resolved.name)}`
+        );
+        return;
+      }
+      const searchRes = await fetch(
+        `/api/places/search?q=${encodeURIComponent(term)}&lang=pt`
+      );
+      if (!searchRes.ok) {
+        const parsed = await parseApiErrorFromResponse(searchRes);
         setError(parsed.message);
         return;
       }
-      const data = await res.json();
-      router.push(`/places?q=${encodeURIComponent(query)}&data=${encodeURIComponent(JSON.stringify(data))}`);
+      router.push(`/places?q=${encodeURIComponent(term)}`);
     } catch {
       setError(parseApiError(null).message);
     } finally {
@@ -53,10 +63,7 @@ export default function SearchPage() {
         setError(parsed.message);
         return;
       }
-      const data = await res.json();
-      router.push(
-        `/places?lat=${latitude}&lng=${longitude}&data=${encodeURIComponent(JSON.stringify(data))}`
-      );
+      router.push(`/places?lat=${latitude}&lng=${longitude}`);
     } catch {
       setError(parseApiError(null).message);
     } finally {

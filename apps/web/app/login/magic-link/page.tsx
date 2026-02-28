@@ -2,22 +2,32 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { magicLinkEmailSchema, type MagicLinkEmailSchema } from "@trekmind/shared";
 import { authClient } from "@/lib/auth-client";
 import { API_ERROR_MESSAGES } from "@/lib/api-errors";
 
 export default function MagicLinkLoginPage() {
-  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const {
+    register,
+    handleSubmit: rhfSubmit,
+    formState: { errors },
+    watch,
+  } = useForm<MagicLinkEmailSchema>({
+    resolver: zodResolver(magicLinkEmailSchema),
+  });
+  const email = watch("email");
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function onSubmit(data: MagicLinkEmailSchema) {
     setError("");
     setLoading(true);
     try {
       const { error: err } = await authClient.signIn.magicLink({
-        email,
+        email: data.email,
         callbackURL: "/",
       });
       if (err) {
@@ -60,15 +70,18 @@ export default function MagicLinkLoginPage() {
         <h1 className="text-2xl font-bold text-slate-800 mb-6">
           Entrar com link por e-mail
         </h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="E-mail"
-            required
-            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-          />
+        <form onSubmit={rhfSubmit(onSubmit)} className="space-y-4">
+          <div>
+            <input
+              type="email"
+              placeholder="E-mail"
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+              {...register("email")}
+            />
+            {errors.email && (
+              <p className="text-red-600 text-sm mt-1">{errors.email.message}</p>
+            )}
+          </div>
           {error && <p className="text-red-600 text-sm">{error}</p>}
           <button
             type="submit"

@@ -6,6 +6,7 @@ export interface GetNearbyPlacesRequest {
   longitude: number;
   radiusKm: number;
   category?: string;
+  lang?: string;
 }
 
 export class GetNearbyPlacesUseCase {
@@ -16,7 +17,8 @@ export class GetNearbyPlacesUseCase {
       request.latitude,
       request.longitude,
       request.radiusKm,
-      request.category
+      request.category,
+      request.lang
     );
     return places.map(toPlaceDTO);
   }
@@ -30,6 +32,9 @@ function toPlaceDTO(place: {
   coordinates: { latitude: number; longitude: number };
   address?: { getValue(): string };
   source?: string;
+  url?: string;
+  imageUrl?: string;
+  wikipediaTitle?: string;
   createdAt: Date;
 }): PlaceDTO {
   return {
@@ -41,6 +46,9 @@ function toPlaceDTO(place: {
     longitude: place.coordinates.longitude,
     address: place.address?.getValue(),
     source: place.source,
+    url: place.url,
+    imageUrl: place.imageUrl,
+    wikipediaTitle: place.wikipediaTitle,
     createdAt: place.createdAt,
   };
 }

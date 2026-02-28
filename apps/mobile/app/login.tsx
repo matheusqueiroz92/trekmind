@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { View, TextInput, Text, Pressable, StyleSheet, Alert } from "react-native";
 import { Link, useRouter } from "expo-router";
+import { setToken } from "../lib/auth-token";
+import { ERROR_MESSAGES, apiErrorMessage } from "../lib/error-messages";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000";
 
@@ -19,17 +21,17 @@ export default function Login() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      const data = await res.json();
+      const data = (await res.json()) as { token?: string; error?: string };
       if (!res.ok) {
-        Alert.alert("Erro", data.error ?? "Falha no login");
+        Alert.alert("Erro", apiErrorMessage(data, ERROR_MESSAGES.LOGIN_FAILED));
         return;
       }
       if (data.token) {
-        // In a real app, store token securely (e.g. expo-secure-store)
+        await setToken(data.token);
         router.replace("/");
       }
     } catch {
-      Alert.alert("Erro", "Sem conexão. Verifique a URL da API.");
+      Alert.alert("Erro", ERROR_MESSAGES.NETWORK);
     } finally {
       setLoading(false);
     }

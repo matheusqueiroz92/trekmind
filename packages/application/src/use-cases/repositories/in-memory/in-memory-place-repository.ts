@@ -9,7 +9,8 @@ export class InMemoryPlaceRepository implements PlaceRepository {
     latitude: number,
     longitude: number,
     radiusKm: number,
-    category?: string
+    category?: string,
+    _lang?: string
   ): Promise<Place[]> {
     return this.places.filter((p) => {
       if (category && p.category.getValue() !== category) return false;
@@ -23,7 +24,11 @@ export class InMemoryPlaceRepository implements PlaceRepository {
     });
   }
 
-  async searchByQuery(query: string, _location?: Location | null): Promise<Place[]> {
+  async searchByQuery(
+    query: string,
+    _location?: Location | null,
+    _lang?: string
+  ): Promise<Place[]> {
     const q = query.toLowerCase();
     return this.places.filter(
       (p) =>

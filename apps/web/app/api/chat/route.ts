@@ -7,11 +7,16 @@ import {
   TravelRetrievalService,
   OpenAILLMClient,
 } from "@trekmind/infrastructure";
+import { chatRequestBodySchema } from "@trekmind/shared";
 import {
   apiErrorResponse,
   handleRouteError,
   API_ERROR_MESSAGES,
 } from "@/lib/api-errors";
+import { getCurrentUser } from "@/lib/auth";
+import { logger } from "@/lib/logger";
+import { checkRateLimit, getClientIdentifier } from "@/lib/rate-limit";
+import { validateEnv } from "@/lib/validate-env";
 
 const placeRepository = new ExternalPlaceRepository();
 const wikiGateway = new WikipediaGateway();
@@ -29,23 +34,35 @@ const answerTravelQuestion = new AnswerTravelQuestionUseCase(
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as {
-      message?: string;
-      latitude?: number;
-      longitude?: number;
-    };
-    const message =
-      typeof body.message === "string" ? body.message.trim() : "";
-    if (!message) {
+    validateEnv();
+    const id = getClientIdentifier(request);
+    const limit = checkRateLimit(`chat:${id}`, { windowMs: 60_000, max: 30 });
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: API_ERROR_MESSAGES.RATE_LIMIT },
+        { status: 429, headers: limit.retryAfterMs ? { "Retry-After": String(Math.ceil(limit.retryAfterMs / 1000)) } : undefined }
+      );
+    }
+    const raw = (await request.json()) as unknown;
+    const parsed = chatRequestBodySchema.safeParse(raw);
+    if (!parsed.success) {
       return apiErrorResponse(
         API_ERROR_MESSAGES.CHAT_MESSAGE_REQUIRED,
         400
       );
     }
-    const latitude =
-      typeof body.latitude === "number" ? body.latitude : undefined;
-    const longitude =
-      typeof body.longitude === "number" ? body.longitude : undefined;
+    const { message, latitude, longitude } = parsed.data;
+    if (!message || message.trim().length === 0) {
+      return apiErrorResponse(
+        API_ERROR_MESSAGES.CHAT_MESSAGE_REQUIRED,
+        400
+      );
+    }
+
+    const user = await getCurrentUser(request);
+    if (user) {
+      logger.info("Chat request", { userId: user.id });
+    }
 
     const answer = await answerTravelQuestion.execute({
       message,

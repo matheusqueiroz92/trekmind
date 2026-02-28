@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 /**
  * Formato padrão de erro nas respostas da API.
@@ -28,12 +29,25 @@ export const API_ERROR_MESSAGES = {
   /** Lugares próximos */
   NEARBY_COORDS_REQUIRED: "É necessário informar latitude e longitude.",
   NEARBY_FAILED: "Não foi possível buscar lugares próximos. Tente novamente.",
+  /** Detalhes do lugar */
+  DETAILS_TITLE_REQUIRED: "Informe o nome ou título do lugar para ver os detalhes.",
+  DETAILS_NOT_FOUND: "Não foi possível carregar os detalhes deste lugar. Tente outro.",
+  DETAILS_FAILED: "Não foi possível buscar os detalhes do lugar. Tente novamente.",
+  /** Resolver lugar */
+  RESOLVE_QUERY_REQUIRED: "Informe o termo (q) para resolver o lugar.",
+  RESOLVE_NOT_FOUND: "Não foi possível encontrar este lugar.",
+  RESOLVE_FAILED: "Não foi possível resolver o lugar. Tente novamente.",
+  /** Lugares por categoria */
+  BY_CATEGORY_QUERY_REQUIRED: "Informe o termo de busca (q) para buscar por categoria.",
+  BY_CATEGORY_FAILED: "Não foi possível buscar lugares por categoria. Tente novamente.",
   /** Auth (fallback quando Better Auth não retorna mensagem) */
   AUTH_LOGIN_FAILED: "Não foi possível entrar. Verifique e-mail e senha.",
   AUTH_REGISTER_FAILED: "Não foi possível criar sua conta. Tente novamente.",
   AUTH_MAGIC_LINK_FAILED: "Não foi possível enviar o link por e-mail. Tente novamente.",
   /** Rede */
   NETWORK_ERROR: "Verifique sua conexão e tente novamente.",
+  /** Rate limit (429) */
+  RATE_LIMIT: "Muitas requisições. Aguarde um momento e tente novamente.",
 } as const;
 
 /**
@@ -57,8 +71,6 @@ export function handleRouteError(
   err: unknown,
   userMessage: string = API_ERROR_MESSAGES.INTERNAL
 ): NextResponse {
-  if (process.env.NODE_ENV !== "test") {
-    console.error("[API Error]", err instanceof Error ? err.message : err);
-  }
+  logger.error("API Error", { message: err instanceof Error ? err.message : String(err) });
   return apiErrorResponse(userMessage, 500);
 }

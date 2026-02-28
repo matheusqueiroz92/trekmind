@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { API_ERROR_MESSAGES } from "@/lib/api-errors";
+import { auth } from "@/lib/better-auth";
+import { getBearerPayload } from "@/lib/auth";
 
-const PUBLIC_PATHS = ["/", "/login", "/register", "/login/magic-link"];
+const PUBLIC_PATHS = ["/", "/login", "/register", "/login/magic-link", "/api-docs"];
 const API_AUTH_PREFIX = "/api/auth";
 
 function isPublicPath(pathname: string): boolean {
@@ -13,19 +15,23 @@ function isAuthApiPath(pathname: string): boolean {
   return pathname.startsWith(API_AUTH_PREFIX);
 }
 
+/** Usa a mesma instância do Better Auth para validar sessão pelos headers da requisição. */
 async function hasBetterAuthSession(request: NextRequest): Promise<boolean> {
-  const origin = request.nextUrl.origin;
-  const cookie = request.headers.get("cookie") ?? "";
   try {
-    const res = await fetch(`${origin}/api/auth/get-session`, {
-      headers: { cookie },
+    const session = await auth.api.getSession({
+      headers: request.headers,
     });
-    if (!res.ok) return false;
-    const data = await res.json();
-    return data?.data?.session != null;
+    return session != null;
   } catch {
     return false;
   }
+}
+
+/** True if request has valid session (cookie) or Bearer JWT (mobile). */
+async function isAuthenticated(request: NextRequest): Promise<boolean> {
+  const bearer = await getBearerPayload(request);
+  if (bearer) return true;
+  return hasBetterAuthSession(request);
 }
 
 export async function proxy(request: NextRequest) {
@@ -36,10 +42,10 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Other API routes: require valid Better Auth session
+  // Other API routes: require valid session or Bearer JWT
   if (pathname.startsWith("/api/")) {
-    const hasSession = await hasBetterAuthSession(request);
-    if (!hasSession) {
+    const ok = await isAuthenticated(request);
+    if (!ok) {
       return NextResponse.json(
         { error: API_ERROR_MESSAGES.UNAUTHORIZED },
         { status: 401 }
@@ -53,8 +59,8 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const hasSession = await hasBetterAuthSession(request);
-  if (!hasSession) {
+  const ok = await isAuthenticated(request);
+  if (!ok) {
     const loginUrl = new URL("/login", request.url);
     return NextResponse.redirect(loginUrl);
   }

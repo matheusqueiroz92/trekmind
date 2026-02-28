@@ -13,6 +13,9 @@ type PlaceProps = {
   coordinates: LatLong;
   address?: Address;
   source?: PlaceSource;
+  url?: string;
+  imageUrl?: string;
+  wikipediaTitle?: string;
   createdAt: Date;
 };
 
@@ -28,6 +31,9 @@ export class Place {
     longitude: number;
     address?: string;
     source?: PlaceSource;
+    url?: string;
+    imageUrl?: string;
+    wikipediaTitle?: string;
   }): Place {
     const name = props.name?.trim();
     if (!name || name.length === 0) {
@@ -51,6 +57,9 @@ export class Place {
       coordinates,
       address,
       source: props.source,
+      url: props.url?.trim(),
+      imageUrl: props.imageUrl?.trim(),
+      wikipediaTitle: props.wikipediaTitle?.trim(),
       createdAt: new Date(),
     });
   }
@@ -64,6 +73,9 @@ export class Place {
     longitude: number;
     address?: string;
     source?: PlaceSource;
+    url?: string;
+    imageUrl?: string;
+    wikipediaTitle?: string;
     createdAt: Date;
   }): Place {
     const coordinates = LatLong.create({
@@ -83,6 +95,9 @@ export class Place {
       coordinates,
       address,
       source: props.source,
+      url: props.url,
+      imageUrl: props.imageUrl,
+      wikipediaTitle: props.wikipediaTitle,
       createdAt: props.createdAt,
     });
   }
@@ -107,6 +122,15 @@ export class Place {
   }
   get source(): PlaceSource | undefined {
     return this.props.source;
+  }
+  get url(): string | undefined {
+    return this.props.url;
+  }
+  get imageUrl(): string | undefined {
+    return this.props.imageUrl;
+  }
+  get wikipediaTitle(): string | undefined {
+    return this.props.wikipediaTitle;
   }
   get createdAt(): Date {
     return this.props.createdAt;

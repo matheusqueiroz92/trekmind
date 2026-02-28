@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
+    "@react-google-maps/api": "^2.20.8",
     "@trekmind/application": "workspace:*",
     "@trekmind/domain": "workspace:*",
     "@trekmind/infrastructure": "workspace:*",
@@ -20,15 +21,20 @@
     "better-auth": "^1.4.19",
     "dotenv": "^17.3.1",
     "jose": "^5.0.0",
+    "leaflet": "^1.9.4",
     "next": "16.1.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.54.0",
+    "react-leaflet": "^5.0.0",
+    "resend": "^6.9.2",
+    "swagger-ui-react": "^5.31.2",
     "zod": "^3.24.0"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@types/leaflet": "^1.9.21",
     "@types/node": "^22.15.3",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",

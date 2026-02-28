@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SearchPlacesUseCase } from "@trekmind/application";
 import { ExternalPlaceRepository, GeocodingServiceImpl } from "@trekmind/infrastructure";
+import { placesSearchQuerySchema } from "@trekmind/shared";
 import {
   apiErrorResponse,
   handleRouteError,
   API_ERROR_MESSAGES,
 } from "@/lib/api-errors";
+import { getCurrentUser } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 
 const placeRepository = new ExternalPlaceRepository();
 const geocoding = new GeocodingServiceImpl();
@@ -14,26 +17,34 @@ const searchPlaces = new SearchPlacesUseCase(placeRepository, geocoding);
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const q = searchParams.get("q")?.trim();
-    if (!q) {
+    const parsed = placesSearchQuerySchema.safeParse({
+      q: searchParams.get("q") ?? undefined,
+      lat: searchParams.get("lat") ?? undefined,
+      lng: searchParams.get("lng") ?? undefined,
+      address: searchParams.get("address") ?? undefined,
+      city: searchParams.get("city") ?? undefined,
+      country: searchParams.get("country") ?? undefined,
+      lang: searchParams.get("lang") ?? undefined,
+    });
+    if (!parsed.success) {
       return apiErrorResponse(
         API_ERROR_MESSAGES.SEARCH_QUERY_REQUIRED,
         400
       );
     }
-    const lat = searchParams.get("lat");
-    const lng = searchParams.get("lng");
-    const address = searchParams.get("address") ?? undefined;
-    const city = searchParams.get("city") ?? undefined;
-    const country = searchParams.get("country") ?? undefined;
+    const { q, lat, lng, address, city, country, lang } = parsed.data;
+    const user = await getCurrentUser(request);
+    if (user) logger.info("Places search", { userId: user.id });
 
+    const langToUse = lang ?? "pt";
     const places = await searchPlaces.execute({
       query: q,
-      latitude: lat ? parseFloat(lat) : undefined,
-      longitude: lng ? parseFloat(lng) : undefined,
+      latitude: lat,
+      longitude: lng,
       address: address || undefined,
       city: city || undefined,
       country: country || undefined,
+      lang: langToUse,
     });
     return NextResponse.json(places);
   } catch (err) {

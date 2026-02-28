@@ -2,30 +2,35 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 import { proxy } from "./proxy";
 
+vi.mock("@/lib/better-auth", () => ({
+  auth: {
+    api: {
+      getSession: vi.fn(),
+    },
+  },
+}));
+
+vi.mock("@/lib/auth", () => ({
+  getBearerPayload: vi.fn().mockResolvedValue(null),
+}));
+
+async function getAuthMock(): Promise<ReturnType<typeof vi.fn>> {
+  const { auth } = await import("@/lib/better-auth");
+  return auth.api.getSession as unknown as ReturnType<typeof vi.fn>;
+}
+
 describe("proxy", () => {
-  beforeEach(() => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn((url: string | URL, init?: RequestInit) => {
-        const u = typeof url === "string" ? url : url.toString();
-        if (u.includes("/api/auth/get-session")) {
-          const cookie = (init?.headers as Record<string, string>)?.cookie ?? "";
-          const hasSession = cookie.includes("better-auth.session_token");
-          return Promise.resolve({
-            ok: hasSession,
-            json: () =>
-              Promise.resolve(
-                hasSession ? { data: { session: {}, user: {} } } : { data: null }
-              ),
-          } as Response);
-        }
-        return Promise.resolve(new Response());
-      })
-    );
+  beforeEach(async () => {
+    const getSession = await getAuthMock();
+    getSession.mockImplementation((opts: { headers: Headers }) => {
+      const cookie = opts?.headers?.get?.("cookie") ?? "";
+      const hasSession = cookie.includes("better-auth.session_token");
+      return Promise.resolve(hasSession ? { session: {}, user: {} } : null);
+    });
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    vi.clearAllMocks();
   });
 
   it("allows public path / without session", async () => {

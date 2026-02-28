@@ -3,33 +3,39 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { userRegisterSchema, type UserRegisterSchema } from "@trekmind/shared";
 import { authClient } from "@/lib/auth-client";
 import { API_ERROR_MESSAGES } from "@/lib/api-errors";
 
 export default function RegisterPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const {
+    register,
+    handleSubmit: rhfSubmit,
+    formState: { errors },
+  } = useForm<UserRegisterSchema>({
+    resolver: zodResolver(userRegisterSchema),
+  });
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function onSubmit(data: UserRegisterSchema) {
     setError("");
     setLoading(true);
     try {
-      const { data, error: err } = await authClient.signUp.email({
-        name,
-        email,
-        password: password || undefined,
+      const { data: result, error: err } = await authClient.signUp.email({
+        name: data.name,
+        email: data.email,
+        password: data.password ?? "",
         callbackURL: "/",
       });
       if (err) {
         setError(err.message ?? API_ERROR_MESSAGES.AUTH_REGISTER_FAILED);
         return;
       }
-      if (data) {
+      if (result) {
         router.push("/");
         router.refresh();
       }
@@ -52,32 +58,40 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
       <div className="w-full max-w-md">
         <h1 className="text-2xl font-bold text-slate-800 mb-6">Cadastrar</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Nome"
-            required
-            minLength={2}
-            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-          />
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="E-mail"
-            required
-            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Senha (mín. 8 caracteres)"
-            minLength={8}
-            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-          />
+        <form onSubmit={rhfSubmit(onSubmit)} className="space-y-4">
+          <div>
+            <input
+              type="text"
+              placeholder="Nome"
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+              {...register("name")}
+            />
+            {errors.name && (
+              <p className="text-red-600 text-sm mt-1">{errors.name.message}</p>
+            )}
+          </div>
+          <div>
+            <input
+              type="email"
+              placeholder="E-mail"
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+              {...register("email")}
+            />
+            {errors.email && (
+              <p className="text-red-600 text-sm mt-1">{errors.email.message}</p>
+            )}
+          </div>
+          <div>
+            <input
+              type="password"
+              placeholder="Senha (mín. 8 caracteres)"
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+              {...register("password")}
+            />
+            {errors.password && (
+              <p className="text-red-600 text-sm mt-1">{errors.password.message}</p>
+            )}
+          </div>
           {error && <p className="text-red-600 text-sm">{error}</p>}
           <button
             type="submit"

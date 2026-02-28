@@ -6,8 +6,13 @@ export interface PlaceRepository {
     latitude: number,
     longitude: number,
     radiusKm: number,
-    category?: string
+    category?: string,
+    lang?: string
   ): Promise<Place[]>;
 
-  searchByQuery(query: string, location?: Location | null): Promise<Place[]>;
+  searchByQuery(
+    query: string,
+    location?: Location | null,
+    lang?: string
+  ): Promise<Place[]>;
 }

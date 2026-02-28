@@ -63,4 +63,39 @@ describe("Place Entity", () => {
     expect(place.name).toBe("Ibirapuera");
     expect(place.createdAt).toEqual(new Date("2024-01-01"));
   });
+
+  it("should accept optional url and imageUrl on create", () => {
+    const place = Place.create({
+      id: "wiki-Paris-0",
+      name: "Paris",
+      description: "Capital of France",
+      category: "other",
+      latitude: 48.8566,
+      longitude: 2.3522,
+      url: "https://en.wikipedia.org/wiki/Paris",
+      imageUrl: "https://upload.wikimedia.org/paris.jpg",
+      source: "wikipedia",
+    });
+    expect(place.url).toBe("https://en.wikipedia.org/wiki/Paris");
+    expect(place.imageUrl).toBe("https://upload.wikimedia.org/paris.jpg");
+  });
+
+  it("should reconstitute with url, imageUrl and wikipediaTitle", () => {
+    const place = Place.reconstitute({
+      id: "wiki-Paris-0",
+      name: "Paris",
+      description: "Capital of France",
+      category: "other",
+      latitude: 48.8566,
+      longitude: 2.3522,
+      url: "https://pt.wikipedia.org/wiki/Paris",
+      imageUrl: "https://upload.wikimedia.org/paris.jpg",
+      wikipediaTitle: "Paris",
+      source: "wikipedia",
+      createdAt: new Date(),
+    });
+    expect(place.url).toBe("https://pt.wikipedia.org/wiki/Paris");
+    expect(place.imageUrl).toBe("https://upload.wikimedia.org/paris.jpg");
+    expect(place.wikipediaTitle).toBe("Paris");
+  });
 });

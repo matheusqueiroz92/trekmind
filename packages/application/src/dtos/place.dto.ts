@@ -7,5 +7,8 @@ export interface PlaceDTO {
   longitude: number;
   address?: string;
   source?: string;
+  url?: string;
+  imageUrl?: string;
+  wikipediaTitle?: string;
   createdAt: Date;
 }

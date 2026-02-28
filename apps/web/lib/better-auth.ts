@@ -3,6 +3,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { magicLink } from "better-auth/plugins/magic-link";
 import { twoFactor } from "better-auth/plugins/two-factor";
+import { Resend } from "resend";
 import {
   db,
   user,
@@ -10,17 +11,38 @@ import {
   account,
   verification,
 } from "@trekmind/infrastructure";
+import { logger } from "@/lib/logger";
 
 const baseURL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
+const resendApiKey = process.env.RESEND_API_KEY?.trim();
+const resendFrom =
+  process.env.RESEND_FROM ?? "TrekMind <onboarding@resend.dev>";
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
+
 export const auth = betterAuth({
+  emailAndPassword: {
+    enabled: true,
+  },
   plugins: [
     nextCookies(),
     magicLink({
       sendMagicLink: async ({ email, url }) => {
-        // TODO: integrate with your email provider (Resend, SendGrid, etc.)
-        console.log("[Better Auth] Magic link for", email, "->", url);
+        if (resend) {
+          const { error } = await resend.emails.send({
+            from: resendFrom,
+            to: email,
+            subject: "Seu link de acesso — TrekMind",
+            html: `Clique no link para entrar: <a href="${url}">${url}</a>. O link expira em alguns minutos.`,
+          });
+          if (error) {
+            logger.error("Better Auth: Resend error", { error });
+            throw new Error("Falha ao enviar e-mail.");
+          }
+        } else {
+          logger.info("Magic link (no Resend)", { email });
+        }
       },
     }),
     twoFactor(),

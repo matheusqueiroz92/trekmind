@@ -103,7 +103,9 @@ Principais variáveis (ver `.env.example`):
 | Variável              | Descrição                                                                                    |
 | --------------------- | -------------------------------------------------------------------------------------------- |
 | `DATABASE_URL`        | Connection string PostgreSQL (ex.: `postgresql://trekmind:trekmind@localhost:5432/trekmind`) |
-| `JWT_SECRET`          | Chave para assinatura de tokens JWT (use valor forte em produção)                            |
+| `BETTER_AUTH_SECRET`  | Segredo do Better Auth (sessões; mín. 32 caracteres). Use valor forte em produção.           |
+| `NEXT_PUBLIC_SITE_URL`| URL do site (ex.: `http://localhost:3000`). Necessária para auth e callbacks.                 |
+| `JWT_SECRET`          | (Opcional) Chave para JWT usados pelo app mobile; fallback de `BETTER_AUTH_SECRET` se não definido. |
 | `OPENAI_API_KEY`      | Chave da API OpenAI para o assistente de viagens (chat)                                      |
 | `EXPO_PUBLIC_API_URL` | (Opcional) URL base da API para o app mobile (ex.: `http://localhost:3000`)                  |
 

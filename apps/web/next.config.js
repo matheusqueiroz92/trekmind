@@ -9,6 +9,11 @@ config({ path: path.resolve(__dirname, "../../.env") });
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@trekmind/domain"],
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "upload.wikimedia.org", pathname: "/**" },
+    ],
+  },
 };
 
 export default nextConfig;

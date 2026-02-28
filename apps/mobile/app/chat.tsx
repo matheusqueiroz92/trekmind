@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet, FlatList } from "react-native";
 import { Link } from "expo-router";
+import { authHeaders } from "../lib/auth-token";
+import { ERROR_MESSAGES, apiErrorMessage } from "../lib/error-messages";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000";
 
@@ -26,9 +28,10 @@ export default function Chat() {
         body.latitude = location.lat;
         body.longitude = location.lng;
       }
+      const headers = await authHeaders();
       const res = await fetch(`${API_URL}/api/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(body),
       });
       const data = (await res.json()) as { answer?: string; error?: string };
@@ -36,13 +39,13 @@ export default function Chat() {
         ...prev,
         {
           role: "assistant",
-          content: res.ok ? (data.answer ?? "") : (data.error ?? "Erro"),
+          content: res.ok ? (data.answer ?? "") : apiErrorMessage(data, ERROR_MESSAGES.CHAT_FAILED),
         },
       ]);
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Erro de conexão." },
+        { role: "assistant", content: ERROR_MESSAGES.NETWORK },
       ]);
     } finally {
       setLoading(false);
